@@ -857,7 +857,9 @@ class AttackExecutor:
             except Exception as e:
                 self.log.warn(f"Test round {rn} error: {e}"); break
 
-        return self._judge(goal, mems, tool_calls, final or "")
+        ev, d = self._judge(goal, mems, tool_calls, final or "")
+        d["messages"] = msgs
+        return ev, d
 
     def _init_envs(self, environments):
         if not self.env_mgr: return [], []
@@ -1049,6 +1051,7 @@ class SingleModelRunner:
                     "baseline_eval": bev.value, "attack_eval": best_ev.value,
                     "attack_successful": success, "final_memories": best_mems or [],
                     "evasiveness_scores": best_evs or [], "strategies_tried": len(strats),
+                    "messages": best_det.get("messages", []),
                     "score": best_det.get("score", 0)})
                 tested += 1
                 self.log.info(f"Result: {best_ev.value} | Score: {best_det.get('score',0)}/5")
